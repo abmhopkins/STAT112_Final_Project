@@ -16,10 +16,8 @@ output:
 
 ```{r libraries}
 library(tidyverse)     # for data cleaning and plotting
-library(gardenR)       # for Lisa's garden data
 library(lubridate)     # for date manipulation
 library(openintro)     # for the abbr2state() function
-library(palmerpenguins)# for Palmer penguin data
 library(maps)          # for map data
 library(ggmap)         # for mapping points on maps
 library(gplots)        # for col2hex() function
@@ -37,12 +35,58 @@ library(gt)            # for creating nice tables
 library(rvest)         # for scraping data
 library(robotstxt)     # for checking if you can scrape data
 library(readxl)
+library(scales)
 theme_set(theme_minimal())
 ```
 
 ```{r data}
-#Eviction data from the New York Times
+#Eviction data from the Eviction Lab
 evictions_state <- read_csv("evictions_state.csv")
+states_midpoint <- read_csv("state-midpoints.csv")
+
+states_map <- map_data("state")
+```
+
+```{r}
+evict_rate_map <- evictions_state %>% 
+  filter(year == 2016) %>% 
+  mutate(name = str_to_lower(name)) %>% 
+  ggplot() +
+  geom_map(map = states_map,
+           aes(map_id = name,
+               fill = `eviction-rate`)) +
+  expand_limits(x = states_map$long, y = states_map$lat) + 
+  theme_map() +
+  labs(title = "",
+       fill = "") +
+  scale_fill_viridis_c() +
+  theme(legend.background = element_blank())
+
+  ggplotly(evict_rate_map)
+```
+
+```{r}
+options(scipen = 9)
+evictions_state %>% 
+  left_join(states_midpoint,
+            by = c("name" = "location")) %>% 
+  filter(year == 2016,
+         name != "Hawaii") %>% 
+  mutate(name = str_to_lower(name)) %>% 
+  ggplot() +
+  geom_map(map = states_map,
+           aes(map_id = name,
+               fill = population)) +
+  geom_point(aes(x = lon, y = lat, size = `eviction-rate`),
+             color = "red") +
+  expand_limits(x = states_map$long, y = states_map$lat) + 
+  theme_map() +
+  labs(title = "",
+       fill = "Population",
+       size = "Eviction Rate") +
+  scale_fill_viridis_c(labels = comma) +
+  theme(legend.background = element_blank(),
+        legend.position = "right")
 ```
 
 
