@@ -47,6 +47,7 @@ states_midpoint <- read_csv("state-midpoints.csv")
 states_map <- map_data("state")
 ```
 
+<<<<<<< HEAD
 ### Our Initial Research Questions
 Paste in from the readme.md
 
@@ -99,4 +100,6 @@ evictions_state %>%
   labs(title = "Population and Eviction rates in 2016")
 ```
 
+=======
+>>>>>>> 94eb792b945a44c27fb1d6880e2cfbe0826b9baa
 
