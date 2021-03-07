@@ -1,0 +1,113 @@
+---
+title: "Final Project"
+author: "Alexander Hopkins, Brett Hunsanger & Ted Dove"
+output: 
+  html_document:
+    keep_md: TRUE
+    toc: TRUE
+    toc_float: TRUE
+    df_print: paged
+    code_download: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, error=TRUE, message=FALSE, warning=FALSE)
+```
+
+```{r libraries}
+library(tidyverse)     # for data cleaning and plotting
+library(lubridate)     # for date manipulation
+library(openintro)     # for the abbr2state() function
+library(maps)          # for map data
+library(ggmap)         # for mapping points on maps
+library(gplots)        # for col2hex() function
+library(RColorBrewer)  # for color palettes
+library(sf)            # for working with spatial data
+library(leaflet)       # for highly customizable mapping
+library(ggthemes)      # for more themes (including theme_map())
+library(plotly)        # for the ggplotly() - basic interactivity
+library(gganimate)     # for adding animation layers to ggplots
+library(gifski)        # for creating the gif (don't need to load this library every time,but need it installed)
+library(transformr)    # for "tweening" (gganimate)
+library(shiny)         # for creating interactive apps
+library(patchwork)     # for nicely combining ggplot2 graphs  
+library(gt)            # for creating nice tables
+library(rvest)         # for scraping data
+library(robotstxt)     # for checking if you can scrape data
+library(readxl)
+library(scales)
+theme_set(theme_minimal())
+```
+
+```{r data}
+#Eviction data from the Eviction Lab
+evictions_state <- read_csv("evictions_state.csv")
+states_midpoint <- read_csv("state-midpoints.csv")
+
+states_map <- map_data("state")
+```
+
+### The Data
+Our data is from the [Eviction Lab](https://evictionlab.org/), on their website they introduce themselves as "The Eviction Lab is a team of researchers, students, and website architects who believe that a stable, affordable home is central to human flourishing and economic mobility. Accordingly, understanding the sudden, traumatic loss of home through eviction is foundational to understanding poverty in America. Drawing on tens of millions of records, the Eviction Lab at Princeton University has published the first ever dataset of evictions in America, going back to 2000."
+
+### Our Initial Research Questions
+When we began thinking about the data we had some questions right away about eviction and race. Is there a relationship between race and the eviction rate in the US? There is also rent information in the data and we wanted to compare rent over each state and see what effect rent had on eviction rates. Some of the final questions we had were what are the states with the highest eviction filing rates and if it was easier to evict people in some states compared to others.
+
+### Some Preliminary Graphs
+First we wanted to explore the data with a plotly graph and mapped the eviction rates by state in 2016. After looking at that graph and discussing more what we wanted to show with our data (Courtesy of Eviction Lab) we decided to make a shiny app that users could interact with to see eviction rates over time as well as interact with demographic and other data by state to see relationships between that data and eviction rates. 
+
+```{r}
+evict_rate_map <- evictions_state %>% 
+  filter(year == 2016) %>% 
+  mutate(name = str_to_lower(name)) %>% 
+  ggplot() +
+  geom_map(map = states_map,
+           aes(map_id = name,
+               fill = `eviction-rate`)) +
+  expand_limits(x = states_map$long, y = states_map$lat) + 
+  theme_map() +
+  labs(title = "",
+       fill = "") +
+  scale_fill_viridis_c() +
+  theme(legend.background = element_blank()) +
+  labs(title = "Eviction Rate by State in 2016")
+
+  ggplotly(evict_rate_map)
+```
+
+This graph for example overlays evictions rates on a map of the US that is colored by population. We can see that population does not seem to have a strong effect on eviction rates as California and Texas do not have greatly high eviction rates compared to some states like South Carolina and Delaware which have much lower populations
+
+```{r}
+options(scipen = 9)
+evictions_state %>% 
+  left_join(states_midpoint,
+            by = c("name" = "location")) %>% 
+  filter(year == 2016,
+         name != "Hawaii") %>% 
+  mutate(name = str_to_lower(name)) %>% 
+  ggplot() +
+  geom_map(map = states_map,
+           aes(map_id = name,
+               fill = population)) +
+  geom_point(aes(x = lon, y = lat, size = `eviction-rate`),
+             color = "red") +
+  expand_limits(x = states_map$long, y = states_map$lat) + 
+  theme_map() +
+  labs(title = "",
+       fill = "Population",
+       size = "Eviction Rate") +
+  scale_fill_viridis_c(labels = comma) +
+  theme(legend.background = element_blank(),
+        legend.position = "right") +
+  labs(title = "Population and Eviction rates in 2016")
+```
+
+
+### Our Shiny App
+Click [Here]() to interact with the data yourself! Choose from a variety of factors like race, median rent, and year to display graphs to see relationships between demographics and evictions.
+
+### Final Remarks
+While we recognize that the data we use is at the state level and smooths over a lot of individual cases and regions within states, the data and visualizations are still effective at revealing eviction trends and relationships over time in the U.S.
+
+**Include a few more observations here**
+
