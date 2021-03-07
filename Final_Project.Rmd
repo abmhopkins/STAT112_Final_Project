@@ -47,12 +47,14 @@ states_midpoint <- read_csv("state-midpoints.csv")
 states_map <- map_data("state")
 ```
 
-<<<<<<< HEAD
+### The Data
+Our data is from the [Eviction Lab](https://evictionlab.org/), on their website they introduce themselves as "The Eviction Lab is a team of researchers, students, and website architects who believe that a stable, affordable home is central to human flourishing and economic mobility. Accordingly, understanding the sudden, traumatic loss of home through eviction is foundational to understanding poverty in America. Drawing on tens of millions of records, the Eviction Lab at Princeton University has published the first ever dataset of evictions in America, going back to 2000."
+
 ### Our Initial Research Questions
-Paste in from the readme.md
+When we began thinking about the data we had some questions right away about eviction and race. Is there a relationship between race and the eviction rate in the US? There is also rent information in the data and we wanted to compare rent over each state and see what effect rent had on eviction rates. Some of the final questions we had were what are the states with the highest eviction filing rates and if it was easier to evict people in some states compared to others.
 
 ### Some Preliminary Graphs
-First we wanted to explore the data with a plotly graph and mapped the eviction rates by state in 2016. After looking at that graph and discussing more what we wanted to show with our data (Courtesey of Eviction Lab) we decided to make a shiny app that users could interact with to see eviction rates over time as well as interact with demographic and other data by state to see relationships between that data and eviction rates. 
+First we wanted to explore the data with a plotly graph and mapped the eviction rates by state in 2016. After looking at that graph and discussing more what we wanted to show with our data (Courtesy of Eviction Lab) we decided to make a shiny app that users could interact with to see eviction rates over time as well as interact with demographic and other data by state to see relationships between that data and eviction rates. 
 
 ```{r}
 evict_rate_map <- evictions_state %>% 
@@ -100,6 +102,12 @@ evictions_state %>%
   labs(title = "Population and Eviction rates in 2016")
 ```
 
-=======
->>>>>>> 94eb792b945a44c27fb1d6880e2cfbe0826b9baa
+
+### Our Shiny App
+Click [Here]() to interact with the data yourself! Choose from a variety of factors like race, median rent, and year to display graphs to see relationships between demographics and evictions.
+
+### Final Remarks
+While we recognize that the data we use is at the state level and smooths over a lot of individual cases and regions within states, the data and visualizations are still effective at revealing eviction trends and relationships over time in the U.S.
+
+**Include a few more observations here**
 
