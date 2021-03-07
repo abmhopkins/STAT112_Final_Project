@@ -1,0 +1,85 @@
+---
+title: "Final_Project_Alex"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+#knitr::opts_chunk$set(echo = TRUE, error=TRUE, message=FALSE, warning=FALSE)
+```
+
+```{r libraries}
+library(tidyverse)     # for data cleaning and plotting
+library(lubridate)     # for date manipulation
+library(openintro)     # for the abbr2state() function
+library(maps)          # for map data
+library(ggmap)         # for mapping points on maps
+library(gplots)        # for col2hex() function
+library(RColorBrewer)  # for color palettes
+library(sf)            # for working with spatial data
+library(leaflet)       # for highly customizable mapping
+library(ggthemes)      # for more themes (including theme_map())
+library(plotly)        # for the ggplotly() - basic interactivity
+library(gganimate)     # for adding animation layers to ggplots
+library(gifski)        # for creating the gif (don't need to load this library every time,but need it installed)
+library(transformr)    # for "tweening" (gganimate)
+library(shiny)         # for creating interactive apps
+library(patchwork)     # for nicely combining ggplot2 graphs  
+library(gt)            # for creating nice tables
+library(rvest)         # for scraping data
+library(robotstxt)     # for checking if you can scrape data
+library(readxl)
+library(scales)
+theme_set(theme_minimal())
+```
+
+```{r data}
+#Eviction data from the Eviction Lab
+evictions_state <- read_csv("evictions_state.csv")
+states_midpoint <- read_csv("state-midpoints.csv")
+
+states_map <- map_data("state")
+```
+
+```{r}
+evict_rate_map <- evictions_state %>% 
+  filter(year == 2016) %>% 
+  mutate(name = str_to_lower(name)) %>% 
+  ggplot() +
+  geom_map(map = states_map,
+           aes(map_id = name,
+               fill = `eviction-rate`)) +
+  expand_limits(x = states_map$long, y = states_map$lat) + 
+  theme_map() +
+  labs(title = "",
+       fill = "") +
+  scale_fill_viridis_c() +
+  theme(legend.background = element_blank())
+
+  ggplotly(evict_rate_map)
+```
+
+```{r}
+options(scipen = 9)
+evictions_state %>% 
+  left_join(states_midpoint,
+            by = c("name" = "location")) %>% 
+  filter(year == 2016,
+         name != "Hawaii") %>% 
+  mutate(name = str_to_lower(name)) %>% 
+  ggplot() +
+  geom_map(map = states_map,
+           aes(map_id = name,
+               fill = population)) +
+  geom_point(aes(x = lon, y = lat, size = `eviction-rate`),
+             color = "red") +
+  expand_limits(x = states_map$long, y = states_map$lat) + 
+  theme_map() +
+  labs(title = "",
+       fill = "Population",
+       size = "Eviction Rate") +
+  scale_fill_viridis_c(labels = comma) +
+  theme(legend.background = element_blank(),
+        legend.position = "right")
+```
+
+
