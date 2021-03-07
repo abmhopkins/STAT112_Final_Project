@@ -11,7 +11,7 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-#knitr::opts_chunk$set(echo = TRUE, error=TRUE, message=FALSE, warning=FALSE)
+knitr::opts_chunk$set(echo = FALSE, error=TRUE, message=FALSE, warning=FALSE)
 ```
 
 ```{r libraries}
@@ -47,6 +47,12 @@ states_midpoint <- read_csv("state-midpoints.csv")
 states_map <- map_data("state")
 ```
 
+### Our Initial Research Questions
+Paste in from the readme.md
+
+### Some Preliminary Graphs
+First we wanted to explore the data with a plotly graph and mapped the eviction rates by state in 2016. After looking at that graph and discussing more what we wanted to show with our data (Courtesey of Eviction Lab) we decided to make a shiny app that users could interact with to see eviction rates over time as well as interact with demographic and other data by state to see relationships between that data and eviction rates. 
+
 ```{r}
 evict_rate_map <- evictions_state %>% 
   filter(year == 2016) %>% 
@@ -60,10 +66,13 @@ evict_rate_map <- evictions_state %>%
   labs(title = "",
        fill = "") +
   scale_fill_viridis_c() +
-  theme(legend.background = element_blank())
+  theme(legend.background = element_blank()) +
+  labs(title = "Eviction Rate by State in 2016")
 
   ggplotly(evict_rate_map)
 ```
+
+This graph for example overlays evictions rates on a map of the US that is colored by population. We can see that population does not seem to have a strong effect on eviction rates as California and Texas do not have greatly high eviction rates compared to some states like South Carolina and Delaware which have much lower populations
 
 ```{r}
 options(scipen = 9)
@@ -86,7 +95,8 @@ evictions_state %>%
        size = "Eviction Rate") +
   scale_fill_viridis_c(labels = comma) +
   theme(legend.background = element_blank(),
-        legend.position = "right")
+        legend.position = "right") +
+  labs(title = "Population and Eviction rates in 2016")
 ```
 
 
