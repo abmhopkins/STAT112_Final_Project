@@ -30,19 +30,28 @@ states_midpoint <- read_csv("state-midpoints.csv")
 states_map <- map_data("state")
 
 ui <- fluidPage(
-  navbarPage("Eviction rates of US", theme = shinytheme("lumen"),
+    navbarPage("Eviction rates of US", theme = shinytheme("lumen"),
              tabPanel("Country wide by year", fluid = TRUE,
-                      textInput(inputId = "year",
-                          label = "Year:",
-                          value = "",
-                          placeholder = "ex:2005"),
-                          plotlyOutput(outputId = "nameplot"),
-                          submitButton(text = "Create my plot!")),
+                              textInput(inputId = "year",
+                                  label = "Year:",
+                                  value = "",
+                                  placeholder = "ex:2005"),
+                                  plotlyOutput(outputId = "nameplot"),
+                              selectInput(inputId = "colName",
+                                          label = "Data:",
+                                          choices = list("Population" = "population", 
+                                                         "Poverty Rate" = "poverty-rate",
+                                                         "Eviction Rate" = "eviction-rate"),
+                                          multiple = FALSE),
+                              submitButton(text = "Create my plot!")
+                          ),
              tabPanel("By state", fluid = TRUE,
                       selectInput(inputId = "name",
                                   label = "State:",
                                   choices = "Alabama",
-                                  multiple = FALSE)))
+                                  multiple = FALSE)
+             )
+    )
 )
 
 server <- function(input, output) {
@@ -53,7 +62,7 @@ server <- function(input, output) {
       ggplot() +
       geom_map(map = states_map,
                aes(map_id = name,
-                   fill = `eviction-rate`)) +
+                   fill = get(input$colName))) +
       expand_limits(x = states_map$long, y = states_map$lat) + 
       theme_map() +
       labs(title = "",
