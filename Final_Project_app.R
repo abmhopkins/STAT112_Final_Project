@@ -32,13 +32,14 @@ states_map <- map_data("state")
 ui <- fluidPage(
     navbarPage("Eviction rates of US", theme = shinytheme("lumen"),
              tabPanel("Country wide by year", fluid = TRUE,
+                      sidebarLayout(
+                        sidebarPanel(
                               sliderInput(inputId = "year",
                                   label = "Year:",
                                   min = 2000,
                                   max = 2016,
                                   value = "",
                                   sep = ""),
-                                  plotlyOutput(outputId = "nameplot"),
                               selectInput(inputId = "colName",
                                           label = "Data:",
                                           choices = list("Population" = "population", 
@@ -46,7 +47,12 @@ ui <- fluidPage(
                                                          "Eviction Rate" = "eviction-rate"),
                                           multiple = FALSE),
                               submitButton(text = "Create my plot!")
-                          ),
+                        ),
+                        mainPanel(
+                          plotlyOutput(outputId = "nameplot")
+                        )
+                      )
+                    ),
              tabPanel("By state", fluid = TRUE,
                       selectInput(inputId = "name",
                                   label = "State:",
