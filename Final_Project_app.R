@@ -44,7 +44,8 @@ ui <- fluidPage(
                                           label = "Data:",
                                           choices = list("Population" = "population", 
                                                          "Poverty Rate" = "poverty-rate",
-                                                         "Eviction Rate" = "eviction-rate"),
+                                                         "Eviction Rate" = "eviction-rate",
+                                                         "Median Rent" = "median-gross-rent"),
                                           multiple = FALSE),
                               submitButton(text = "Create my plot!")
                         ),
