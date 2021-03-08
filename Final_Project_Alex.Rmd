@@ -82,4 +82,18 @@ evictions_state %>%
         legend.position = "right")
 ```
 
+```{r}
+mydata <- evictions_state[, c(5:24)]
+head(mydata)
+
+cormat <- round(cor(mydata),2)
+head(cormat)
+
+library(reshape2)
+melted_cormat <- melt(cormat)
+head(melted_cormat)
+
+ggplot(data = melted_cormat, aes(x=Var1, y=Var2, fill=value)) + 
+  geom_tile()
+```
 
