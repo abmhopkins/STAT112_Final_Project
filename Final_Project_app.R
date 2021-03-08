@@ -38,7 +38,7 @@ ui <- fluidPage(
                                   label = "Year:",
                                   min = 2000,
                                   max = 2016,
-                                  value = "",
+                                  value = 2000,
                                   sep = ""),
                               selectInput(inputId = "colName",
                                           label = "Data:",
@@ -47,6 +47,9 @@ ui <- fluidPage(
                                                          "Eviction Rate" = "eviction-rate",
                                                          "Median Rent" = "median-gross-rent"),
                                           multiple = FALSE),
+                              checkboxInput(inputId = "eviction-rate",
+                                            label = "Click for stacked eviction rates",
+                                            value = FALSE),
                               submitButton(text = "Create my plot!")
                         ),
                         mainPanel(
@@ -66,12 +69,18 @@ ui <- fluidPage(
 server <- function(input, output) {
   output$nameplot <- renderPlotly({
     evictions_state %>% 
+      filter(name != "Alaska",       #Not letting me filter out here I think I have to do it above
+             name != "Hawaii") %>%
+      left_join(states_midpoint,
+                by = c("name" = "location")) %>% 
       filter(year == input$year) %>% 
       mutate(name = str_to_lower(name)) %>% 
       ggplot() +
       geom_map(map = states_map,
                aes(map_id = name,
                    fill = get(input$colName))) +
+      geom_point(aes(x = states_midpoint$lon, y = states_midpoint$lat, size = `eviction-rate`), #Having an error here still it shows the points no matter if the box is checked or not
+                 color = "red") +
       expand_limits(x = states_map$long, y = states_map$lat) + 
       theme_map() +
       labs(title = "",
