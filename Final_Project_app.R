@@ -32,10 +32,12 @@ states_map <- map_data("state")
 ui <- fluidPage(
     navbarPage("Eviction rates of US", theme = shinytheme("lumen"),
              tabPanel("Country wide by year", fluid = TRUE,
-                              textInput(inputId = "year",
+                              sliderInput(inputId = "year",
                                   label = "Year:",
+                                  min = 2000,
+                                  max = 2016,
                                   value = "",
-                                  placeholder = "ex:2005"),
+                                  sep = ""),
                                   plotlyOutput(outputId = "nameplot"),
                               selectInput(inputId = "colName",
                                           label = "Data:",
@@ -69,7 +71,6 @@ server <- function(input, output) {
            fill = "") +
       scale_fill_viridis_c() +
       theme(legend.background = element_blank())
-
   })
 }
 
