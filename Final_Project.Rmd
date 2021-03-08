@@ -75,7 +75,7 @@ evict_rate_map <- evictions_state %>%
   ggplotly(evict_rate_map)
 ```
 
-This graph for example overlays evictions rates on a map of the US that is colored by population. We can see that population does not seem to have a strong effect on eviction rates as California and Texas do not have greatly high eviction rates compared to some states like South Carolina and Delaware which have much lower populations
+This graph for example overlays evictions rates on a map of the US that is colored by population. We can see that population does not seem to have a strong effect on eviction rates as California and Texas do not have greatly high eviction rates compared to some states like South Carolina and Delaware which have much lower populations.
 
 ```{r}
 options(scipen = 9)
