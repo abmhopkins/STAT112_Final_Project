@@ -4,6 +4,7 @@ library(ggthemes)      # for more themes (including theme_map())
 library(plotly)        # for the ggplotly() - basic interactivity
 library(shiny)         # for creating interactive apps
 library(shinythemes)
+library(scales)
 theme_set(theme_minimal())
 
 evictions_state <- read_csv("evictions_state.csv")
