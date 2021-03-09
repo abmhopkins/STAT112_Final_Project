@@ -84,13 +84,14 @@ server <- function(input, output) {
       filter(year == input$year,
              name != "Alaska",      
              name != "Hawaii") %>% 
-      mutate(name = str_to_lower(name)) %>% 
+      mutate(lwr_name = str_to_lower(name)) %>% 
       ggplot() +
       geom_map(map = states_map,
-               aes(map_id = name,
+               aes(map_id = lwr_name,
                    fill = get(input$colName),
-                   text = (name <br> get(input$colName)))) +
-      {if(input$dots)geom_point(aes(x = lon, y = lat, size = get(input$dotCol)),
+                   text = paste0(name, paste0(":<br>", format(get(input$colName) , big.mark=","))))) +
+      {if(input$dots)geom_point(aes(x = lon, y = lat, size = get(input$dotCol),
+                                    text = paste0(input$dotCol, paste0(": ", get(input$dotCol)))),
                  color = "red")} + 
       expand_limits(x = states_map$long, y = states_map$lat) + 
       theme_map() +
