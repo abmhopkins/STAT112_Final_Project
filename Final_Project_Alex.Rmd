@@ -156,10 +156,10 @@ plot <- evictions_state %>%
 ```{r}
 evictions_county %>% 
       filter(year == 2016,
-             `parent-location` == "Minnesota") %>% 
+             `parent-location` == "Alabama") %>% 
       mutate(lwr_name = str_to_lower(name)) %>% 
       ggplot() +
-      geom_map(map = county_map %>% filter(region == "minnesota"),
+      geom_map(map = county_map %>% filter(region == "alabama"),
                aes(map_id = lwr_name,
                    fill = population,
                    text = paste0(name, paste0(": ", format(population , big.mark=","))))) +

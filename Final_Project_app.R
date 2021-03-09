@@ -59,7 +59,7 @@ ui <- fluidPage(
                           selectInput(inputId = "stateName",
                                       label = "State:",
                                       choices = evictions_state$name,
-                                      selected = "Alabama",
+                                      selected = "Alabama", #this is not selected
                                       multiple = FALSE),
                           sliderInput(inputId = "year",
                                       label = "Year:",
@@ -139,10 +139,10 @@ server <- function(input, output) {
       ggplot() +
       geom_map(map = select_county_map,
                aes(map_id = lwr_name,
-                   fill = population,
+                   fill = get(input$countyColName), # fill also doesn't work
                    group = lwr_name,
-                   text = paste0(name, paste0(": ", format(population , big.mark=","))))) +
-      expand_limits(x = select_county_map$long, y = select_county_map$lat) + 
+                   text = paste0(name, paste0(": ", format(get(input$countyColName) , big.mark=","))))) +
+      expand_limits(x = select_county_map$long, y = select_county_map$lat) + # These limits don't seem to be taken as an arguement
       theme_map() +
       labs(title = "",
            fill = "",
