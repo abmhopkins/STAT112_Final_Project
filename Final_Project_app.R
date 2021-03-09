@@ -1,33 +1,19 @@
 library(shiny)
 library(tidyverse)     # for data cleaning and plotting
-library(lubridate)     # for date manipulation
-library(openintro)     # for the abbr2state() function
-library(maps)          # for map data
-library(ggmap)         # for mapping points on maps
-library(gplots)        # for col2hex() function
-library(RColorBrewer)  # for color palettes
-library(sf)            # for working with spatial data
-library(leaflet)       # for highly customizable mapping
 library(ggthemes)      # for more themes (including theme_map())
 library(plotly)        # for the ggplotly() - basic interactivity
-library(gganimate)     # for adding animation layers to ggplots
-library(gifski)        # for creating the gif (don't need to load this library every time,but need it installed)
-library(transformr)    # for "tweening" (gganimate)
 library(shiny)         # for creating interactive apps
-library(patchwork)     # for nicely combining ggplot2 graphs  
-library(gt)            # for creating nice tables
-library(rvest)         # for scraping data
-library(robotstxt)     # for checking if you can scrape data
-library(readxl)
-library(scales)
-library(babynames)
 library(shinythemes)
 theme_set(theme_minimal())
 
 evictions_state <- read_csv("evictions_state.csv")
+evictions_county <- read_csv("evictions_county.csv") %>% 
+  separate(col = name, sep = " ", into = c("name", "drop")) %>% 
+  select(-drop)
 states_midpoint <- read_csv("state-midpoints.csv")
 
 states_map <- map_data("state")
+county_map <- map_data("county")
 
 ui <- fluidPage(
     navbarPage("Eviction rates of US", theme = shinytheme("lumen"),
@@ -68,17 +54,53 @@ ui <- fluidPage(
                       )
                     ),
              tabPanel("By state", fluid = TRUE,
-                      selectInput(inputId = "name",
-                                  label = "State:",
-                                  choices = "Alabama",
-                                  multiple = FALSE)
+                      sidebarLayout(
+                        sidebarPanel(
+                          selectInput(inputId = "stateName",
+                                      label = "State:",
+                                      choices = evictions_state$name,
+                                      selected = "Alabama",
+                                      multiple = FALSE),
+                          sliderInput(inputId = "year",
+                                      label = "Year:",
+                                      min = 2000,
+                                      max = 2016,
+                                      value = 2000,
+                                      sep = ""),
+                          selectInput(inputId = "countyColName",
+                                      label = "Chloropleth:",
+                                      choices = list("Population" = "population", 
+                                                     "Poverty Rate" = "poverty-rate",
+                                                     "Median Rent" = "median-gross-rent",
+                                                     "Eviction Filings" = "eviction-filings",
+                                                     "% African American" = "pct-af-am",
+                                                     "% Hispanic" = "pct-hispanic",
+                                                     "% White" = "pct-white",
+                                                     "% American Indian" = "pct-am-ind",
+                                                     "% Pacific Islander" = "pct-nh-pi"),
+                                      multiple = FALSE),
+                          # checkboxInput(inputId = "dots",
+                          #               label = "Click for stacked eviction rates data",
+                          #               value = TRUE),
+                          # selectInput(inputId = "dotCol",
+                          #             label = "Dots:",
+                          #             choices = list("Eviction Rate" = "eviction-rate",
+                          #                            "Eviction Filing Rate" = "eviction-filing-rate"),
+                          #            multiple = FALSE),
+                          submitButton(text = "Create my plot!")
+                        ),
+                        mainPanel(
+                          plotlyOutput(outputId = "countyplot")
+                        )
+                      )
+                      
              )
     )
 )
 
 server <- function(input, output) {
   output$nameplot <- renderPlotly({
-    plot <- evictions_state %>% 
+    country_plot <- evictions_state %>% 
       left_join(states_midpoint,
                 by = c("name" = "location")) %>% 
       filter(year == input$year,
@@ -102,7 +124,34 @@ server <- function(input, output) {
       theme(legend.background = element_blank(),
             legend.position = "right")
   
-  ggplotly(plot, tooltip = "text")
+  ggplotly(country_plot, tooltip = "text")
+  })
+  
+  output$countyplot <- renderPlotly({
+    
+    select_county_map <- county_map %>% 
+      filter(region == str_to_lower(input$stateName))
+    
+    county_plot <- evictions_county %>% 
+      filter(year == input$year,
+             `parent-location` == input$stateName) %>% 
+      mutate(lwr_name = str_to_lower(name)) %>% 
+      ggplot() +
+      geom_map(map = select_county_map,
+               aes(map_id = lwr_name,
+                   fill = population,
+                   group = lwr_name,
+                   text = paste0(name, paste0(": ", format(population , big.mark=","))))) +
+      expand_limits(x = select_county_map$long, y = select_county_map$lat) + 
+      theme_map() +
+      labs(title = "",
+           fill = "",
+           size = "") +
+      scale_fill_viridis_c(labels = comma) +
+      theme(legend.background = element_blank(),
+            legend.position = "right")
+    
+    ggplotly(county_plot, tooltip = "text")
   })
 }
 

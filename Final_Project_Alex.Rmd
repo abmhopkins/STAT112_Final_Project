@@ -38,6 +38,11 @@ evictions_state <- read_csv("evictions_state.csv")
 states_midpoint <- read_csv("state-midpoints.csv")
 
 states_map <- map_data("state")
+county_map <- map_data("county")
+
+evictions_county <- read_csv("evictions_county.csv") %>% 
+  separate(col = name, sep = " ", into = c("name", "drop")) %>% 
+  select(-drop)
 ```
 
 ```{r}
@@ -146,5 +151,25 @@ plot <- evictions_state %>%
             legend.position = "right")
   
   ggplotly(plot, tooltip = c("text"))
+```
+
+```{r}
+evictions_county %>% 
+      filter(year == 2016,
+             `parent-location` == "Minnesota") %>% 
+      mutate(lwr_name = str_to_lower(name)) %>% 
+      ggplot() +
+      geom_map(map = county_map %>% filter(region == "minnesota"),
+               aes(map_id = lwr_name,
+                   fill = population,
+                   text = paste0(name, paste0(": ", format(population , big.mark=","))))) +
+      expand_limits(x = county_map$long, y = county_map$lat) + 
+      theme_map() +
+      labs(title = "",
+           fill = "",
+           size = "") +
+      scale_fill_viridis_c(labels = comma) +
+      theme(legend.background = element_blank(),
+            legend.position = "right")
 ```
 
