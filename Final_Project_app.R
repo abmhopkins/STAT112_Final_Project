@@ -41,15 +41,25 @@ ui <- fluidPage(
                                   value = 2000,
                                   sep = ""),
                               selectInput(inputId = "colName",
-                                          label = "Data:",
+                                          label = "Chloropleth:",
                                           choices = list("Population" = "population", 
                                                          "Poverty Rate" = "poverty-rate",
-                                                         "Eviction Rate" = "eviction-rate",
-                                                         "Median Rent" = "median-gross-rent"),
+                                                         "Median Rent" = "median-gross-rent",
+                                                         "Eviction Filings" = "eviction-filings",
+                                                         "% African American" = "pct-af-am",
+                                                         "% Hispanic" = "pct-hispanic",
+                                                         "% White" = "pct-white",
+                                                         "% American Indian" = "pct-am-ind",
+                                                         "% Pacific Islander" = "pct-nh-pi"),
                                           multiple = FALSE),
-                              checkboxInput(inputId = "eviction-rate",
-                                            label = "Click for stacked eviction rates",
-                                            value = FALSE),
+                              checkboxInput(inputId = "dots",
+                                            label = "Click for stacked eviction rates data",
+                                            value = TRUE),
+                              selectInput(inputId = "dotCol",
+                                          label = "Dots:",
+                                          choices = list("Eviction Rate" = "eviction-rate",
+                                                         "Eviction Filing Rate" = "eviction-filing-rate"),
+                                          multiple = FALSE),
                               submitButton(text = "Create my plot!")
                         ),
                         mainPanel(
@@ -68,25 +78,30 @@ ui <- fluidPage(
 
 server <- function(input, output) {
   output$nameplot <- renderPlotly({
-    evictions_state %>% 
-      filter(name != "Alaska",       #Not letting me filter out here I think I have to do it above
-             name != "Hawaii") %>%
+    plot <- evictions_state %>% 
       left_join(states_midpoint,
                 by = c("name" = "location")) %>% 
-      filter(year == input$year) %>% 
+      filter(year == input$year,
+             name != "Alaska",      
+             name != "Hawaii") %>% 
       mutate(name = str_to_lower(name)) %>% 
       ggplot() +
       geom_map(map = states_map,
                aes(map_id = name,
-                   fill = get(input$colName))) +
-      geom_point(aes(x = states_midpoint$lon, y = states_midpoint$lat, size = `eviction-rate`), #Having an error here still it shows the points no matter if the box is checked or not
-                 color = "red") +
+                   fill = get(input$colName),
+                   text = (name <br> get(input$colName)))) +
+      {if(input$dots)geom_point(aes(x = lon, y = lat, size = get(input$dotCol)),
+                 color = "red")} + 
       expand_limits(x = states_map$long, y = states_map$lat) + 
       theme_map() +
       labs(title = "",
-           fill = "") +
-      scale_fill_viridis_c() +
-      theme(legend.background = element_blank())
+           fill = "",
+           size = input$dotCol) +
+      scale_fill_viridis_c(labels = comma) +
+      theme(legend.background = element_blank(),
+            legend.position = "right")
+  
+  ggplotly(plot, tooltip = "text")
   })
 }
 
