@@ -8,9 +8,18 @@ library(scales)
 theme_set(theme_minimal())
 
 evictions_state <- read_csv("evictions_state.csv")
+
 evictions_county <- read_csv("evictions_county.csv") %>% 
-  separate(col = name, sep = " ", into = c("name", "drop")) %>% 
-  select(-drop)
+  separate(col = name, sep = " County", into = c("name", "drop")) %>% 
+  select(-drop) %>% 
+  mutate(name = str_replace_all(name, "St. ", "St "),
+         name = str_replace_all(name, " Parish", ""))
+
+evictions_county$name[evictions_county$name == "LaMoure"] <- "La Moure"
+evictions_county$name[evictions_county$name == "DuPage"] <- "Du Page"
+evictions_county$name[evictions_county$name == "O'Brien"] <- "OBrien"
+evictions_county$name[evictions_county$name == "Ste. Genevieve"] <- "Ste Genevieve"
+
 states_midpoint <- read_csv("state-midpoints.csv")
 
 states_map <- map_data("state")
@@ -59,8 +68,8 @@ ui <- fluidPage(
                         sidebarPanel(
                           selectInput(inputId = "stateName",
                                       label = "State:",
-                                      choices = evictions_state$name,
-                                      selected = "Alabama",
+                                      choices = unique(evictions_state$name),
+                                      selected = "Alabama", #this is not selected
                                       multiple = FALSE),
                           sliderInput(inputId = "year",
                                       label = "Year:",
@@ -71,14 +80,14 @@ ui <- fluidPage(
                           selectInput(inputId = "countyColName",
                                       label = "Chloropleth:",
                                       choices = list("Population" = "population", 
-                                                     "Poverty Rate" = "poverty-rate",
-                                                     "Median Rent" = "median-gross-rent",
-                                                     "Eviction Filings" = "eviction-filings",
-                                                     "% African American" = "pct-af-am",
-                                                     "% Hispanic" = "pct-hispanic",
-                                                     "% White" = "pct-white",
-                                                     "% American Indian" = "pct-am-ind",
-                                                     "% Pacific Islander" = "pct-nh-pi"),
+                                                     "Poverty Rate" = "`poverty-rate`",
+                                                     "Median Rent" = "`median-gross-rent`",
+                                                     "Eviction Filings" = "`eviction-filings`",
+                                                     "% African American" = "`pct-af-am`",
+                                                     "% Hispanic" = "`pct-hispanic`",
+                                                     "% White" = "`pct-white`",
+                                                     "% American Indian" = "`pct-am-ind`",
+                                                     "% Pacific Islander" = "`pct-nh-pi`"),
                                       multiple = FALSE),
                           # checkboxInput(inputId = "dots",
                           #               label = "Click for stacked eviction rates data",
@@ -91,7 +100,7 @@ ui <- fluidPage(
                           submitButton(text = "Create my plot!")
                         ),
                         mainPanel(
-                          plotlyOutput(outputId = "countyplot")
+                          plotOutput(outputId = "countyplot")
                         )
                       )
                       
@@ -128,31 +137,28 @@ server <- function(input, output) {
   ggplotly(country_plot, tooltip = "text")
   })
   
-  output$countyplot <- renderPlotly({
+  output$countyplot <- renderPlot({
     
-    select_county_map <- county_map %>% 
-      filter(region == str_to_lower(input$stateName))
+    map <- county_map %>% filter(region == str_to_lower(input$stateName)) %>% 
+      select(-region) %>% 
+      dplyr::rename(region = subregion)
     
-    county_plot <- evictions_county %>% 
-      filter(year == input$year,
+    evictions_county %>% 
+      filter(year == 2016,
              `parent-location` == input$stateName) %>% 
+      select (-c("low-flag", "imputed", "subbed")) %>% 
       mutate(lwr_name = str_to_lower(name)) %>% 
-      ggplot() +
-      geom_map(map = select_county_map,
-               aes(map_id = lwr_name,
-                   fill = population,
-                   group = lwr_name,
-                   text = paste0(name, paste0(": ", format(population , big.mark=","))))) +
-      expand_limits(x = select_county_map$long, y = select_county_map$lat) + 
-      theme_map() +
-      labs(title = "",
-           fill = "",
-           size = "") +
+      ggplot(aes_string(fill = input$countyColName)) +
+      geom_map(map = map,
+               aes(map_id = lwr_name)) +
       scale_fill_viridis_c(labels = comma) +
+      expand_limits(x = map$long, y = map$lat) + 
+      theme_map() +
       theme(legend.background = element_blank(),
-            legend.position = "right")
-    
-    ggplotly(county_plot, tooltip = "text")
+            legend.position = "right")  +
+      labs(title = "",
+           fill = "")
+
   })
 }
 

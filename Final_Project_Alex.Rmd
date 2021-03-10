@@ -40,9 +40,18 @@ states_midpoint <- read_csv("state-midpoints.csv")
 states_map <- map_data("state")
 county_map <- map_data("county")
 
+evictions_county_org <- read_csv("evictions_county.csv")
+
 evictions_county <- read_csv("evictions_county.csv") %>% 
-  separate(col = name, sep = " ", into = c("name", "drop")) %>% 
-  select(-drop)
+  separate(col = name, sep = " County", into = c("name", "drop")) %>% 
+  select(-drop) %>% 
+  mutate(name = str_replace_all(name, "St. ", "St "),
+         name = str_replace_all(name, " Parish", ""))
+
+evictions_county$name[evictions_county$name == "LaMoure"] <- "La Moure"
+evictions_county$name[evictions_county$name == "DuPage"] <- "Du Page"
+evictions_county$name[evictions_county$name == "O'Brien"] <- "OBrien"
+evictions_county$name[evictions_county$name == "Ste. Genevieve"] <- "Ste Genevieve"
 ```
 
 ```{r}
@@ -156,10 +165,10 @@ plot <- evictions_state %>%
 ```{r}
 evictions_county %>% 
       filter(year == 2016,
-             `parent-location` == "Minnesota") %>% 
+             `parent-location` == "Alabama") %>% 
       mutate(lwr_name = str_to_lower(name)) %>% 
       ggplot() +
-      geom_map(map = county_map %>% filter(region == "minnesota"),
+      geom_map(map = county_map %>% filter(region == "alabama"),
                aes(map_id = lwr_name,
                    fill = population,
                    text = paste0(name, paste0(": ", format(population , big.mark=","))))) +
@@ -171,5 +180,25 @@ evictions_county %>%
       scale_fill_viridis_c(labels = comma) +
       theme(legend.background = element_blank(),
             legend.position = "right")
+```
+
+```{r}
+mn_map <- county_map %>% filter(region == "minnesota") %>% select(-region) %>% dplyr::rename(region = subregion)
+nd_map <- county_map %>% filter(region == "north dakota") %>% select(-region) %>% dplyr::rename(region = subregion)
+map <- county_map %>% filter(region %in% c("missouri", "illinois")) %>% select(-region) %>% dplyr::rename(region = subregion)
+
+county_map %>% select(-region) %>% dplyr::rename(region = subregion)
+
+evictions_county %>% 
+  filter(year == 2016,
+         `parent-location` == "Minnesota") %>% 
+  select (-c("low-flag", "imputed", "subbed")) %>% 
+  mutate(lwr_name = str_to_lower(name)) %>% 
+  ggplot(aes(fill = population)) +
+  geom_map(map = mn_map,
+           aes(map_id = lwr_name)) +
+  scale_fill_viridis_c(labels = comma) +
+  expand_limits(x = mn_map$long, y = mn_map$lat) + 
+  theme_map()
 ```
 
