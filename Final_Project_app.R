@@ -38,6 +38,9 @@ evictions_county <- read_csv("evictions_county.csv") %>%
          longitude = as.numeric(longitude)*-1)
 evictions_county$name[evictions_county$name == "LaMoure"] <- "La Moure"
 evictions_county$name[evictions_county$name == "DuPage"] <- "Du Page"
+evictions_county$name[evictions_county$name == "DeKalb"] <- "De Kalb"
+evictions_county$name[evictions_county$name == "LaSalle"] <- "La Salle"
+evictions_county$name[evictions_county$name == "DeWitt"] <- "De Witt"
 evictions_county$name[evictions_county$name == "O'Brien"] <- "OBrien"
 evictions_county$name[evictions_county$name == "Ste. Genevieve"] <- "Ste Genevieve"
 
@@ -168,7 +171,7 @@ server <- function(input, output) {
       dplyr::rename(region = subregion)
     
     evictions_county %>% 
-      filter(year == 2016,
+      filter(year == input$year,
              `parent-location` == input$stateName) %>% 
       select (-c("low-flag", "imputed", "subbed")) %>% 
       mutate(lwr_name = str_to_lower(name)) %>% 
