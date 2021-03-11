@@ -104,10 +104,10 @@ evictions_state %>%
 
 
 ### Our Shiny App
-Click [Here]() to interact with the data yourself! Choose from a variety of factors like race, median rent, and year to display graphs to see relationships between demographics and evictions.
+Click [Here]() to interact with the data yourself! Choose from a variety of factors like race, median rent, and year to display graphs to see relationships between demographics and evictions. The first tab displays statewide data and the second "by state" tab displays individual states and their county level data.
 
 ### Final Remarks
-While we recognize that the data we use is at the state level and smooths over a lot of individual cases and regions within states, the data and visualizations are still effective at revealing eviction trends and relationships over time in the U.S.
+
 
 **Include a few more observations here**
 
