@@ -5,22 +5,46 @@ library(plotly)        # for the ggplotly() - basic interactivity
 library(shiny)         # for creating interactive apps
 library(shinythemes)
 library(scales)
+library(rvest)
 theme_set(theme_minimal())
 
+# Eviction Data by State
 evictions_state <- read_csv("evictions_state.csv")
 
+# Scrape the County Centroids
+url <- "https://en.wikipedia.org/wiki/User:Michael_J/County_table"
+webpage <- read_html(url)
+table <- html_nodes(webpage, "table")[[1]] %>% 
+  html_table()
+county_centroids <- table %>% 
+  select(State:`County [2]`, Latitude:Longitude)
+
+# Eviction Data by County
 evictions_county <- read_csv("evictions_county.csv") %>% 
   separate(col = name, sep = " County", into = c("name", "drop")) %>% 
   select(-drop) %>% 
   mutate(name = str_replace_all(name, "St. ", "St "),
-         name = str_replace_all(name, " Parish", ""))
-
+         name = str_replace_all(name, " Parish", "")) %>% 
+  left_join(county_centroids,
+            by = c("GEOID" = "FIPS")) %>% 
+  separate(Latitude, into = c("latitude", "drop1"), 
+           sep = "°") %>% 
+  separate(Longitude, into = c("longitude", "drop2"), 
+           sep = "°") %>% 
+  separate(longitude, into = c("drop3", "longitude"), 
+           sep = "–") %>% 
+  select(-drop1, -drop2, -drop3, -State, -"County [2]") %>% 
+  mutate(latitude = as.numeric(latitude),
+         longitude = as.numeric(longitude)*-1)
 evictions_county$name[evictions_county$name == "LaMoure"] <- "La Moure"
 evictions_county$name[evictions_county$name == "DuPage"] <- "Du Page"
 evictions_county$name[evictions_county$name == "O'Brien"] <- "OBrien"
 evictions_county$name[evictions_county$name == "Ste. Genevieve"] <- "Ste Genevieve"
 
+# The Centroid of Each State
 states_midpoint <- read_csv("state-midpoints.csv")
+
+
 
 states_map <- map_data("state")
 county_map <- map_data("county")
@@ -89,14 +113,14 @@ ui <- fluidPage(
                                                      "% American Indian" = "`pct-am-ind`",
                                                      "% Pacific Islander" = "`pct-nh-pi`"),
                                       multiple = FALSE),
-                          # checkboxInput(inputId = "dots",
-                          #               label = "Click for stacked eviction rates data",
-                          #               value = TRUE),
-                          # selectInput(inputId = "dotCol",
-                          #             label = "Dots:",
-                          #             choices = list("Eviction Rate" = "eviction-rate",
-                          #                            "Eviction Filing Rate" = "eviction-filing-rate"),
-                          #            multiple = FALSE),
+                          checkboxInput(inputId = "county_dots",
+                                        label = "Click for stacked eviction rates data",
+                                        value = TRUE),
+                          selectInput(inputId = "countyDotCol",
+                                      label = "Dots:",
+                                      choices = list("Eviction Rate" = "`eviction-rate`",
+                                                     "Eviction Filing Rate" = "`eviction-filing-rate`"),
+                                     multiple = FALSE),
                           submitButton(text = "Create my plot!")
                         ),
                         mainPanel(
@@ -150,14 +174,17 @@ server <- function(input, output) {
       mutate(lwr_name = str_to_lower(name)) %>% 
       ggplot(aes_string(fill = input$countyColName)) +
       geom_map(map = map,
-               aes(map_id = lwr_name)) +
+               aes(map_id = lwr_name))  +
+      {if(input$county_dots)geom_point(aes_string(x = "longitude", y = "latitude", size = input$countyDotCol),
+                                color = "red")} +
       scale_fill_viridis_c(labels = comma) +
       expand_limits(x = map$long, y = map$lat) + 
       theme_map() +
       theme(legend.background = element_blank(),
             legend.position = "right")  +
       labs(title = "",
-           fill = "")
+           fill = "",
+           size = "")
 
   })
 }

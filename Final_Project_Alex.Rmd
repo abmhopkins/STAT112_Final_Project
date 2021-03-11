@@ -46,7 +46,18 @@ evictions_county <- read_csv("evictions_county.csv") %>%
   separate(col = name, sep = " County", into = c("name", "drop")) %>% 
   select(-drop) %>% 
   mutate(name = str_replace_all(name, "St. ", "St "),
-         name = str_replace_all(name, " Parish", ""))
+         name = str_replace_all(name, " Parish", "")) %>% 
+  left_join(county_centroids,
+            by = c("GEOID" = "FIPS")) %>% 
+  separate(Latitude, into = c("latitude", "drop1"), 
+           sep = "°") %>% 
+  separate(Longitude, into = c("longitude", "drop2"), 
+           sep = "°") %>% 
+  separate(longitude, into = c("drop3", "longitude"), 
+           sep = "–") %>% 
+  select(-drop1, -drop2, -drop3, -State, -county) %>% 
+  mutate(latitude = as.numeric(latitude),
+         longitude = as.numeric(longitude)*-1)
 
 evictions_county$name[evictions_county$name == "LaMoure"] <- "La Moure"
 evictions_county$name[evictions_county$name == "DuPage"] <- "Du Page"
@@ -197,6 +208,44 @@ evictions_county %>%
   ggplot(aes(fill = population)) +
   geom_map(map = mn_map,
            aes(map_id = lwr_name)) +
+  scale_fill_viridis_c(labels = comma) +
+  expand_limits(x = mn_map$long, y = mn_map$lat) + 
+  theme_map()
+```
+
+```{r}
+url <- "https://en.wikipedia.org/wiki/User:Michael_J/County_table"
+webpage <- read_html(url)
+
+table <- html_nodes(webpage, "table")[[1]] %>% 
+  html_table()
+
+county_centroids <- table %>% 
+  select(State:`County [2]`, Latitude:Longitude)
+
+names(county_centroids)[names(county_centroids) == "County [2]"] <- "county"
+
+evictions_county_midpoints <- evictions_county %>% 
+  left_join(county_centroids,
+            by = c("GEOID" = "FIPS")) %>% 
+  separate(Latitude, into = c("latitude", "drop1"), 
+           sep = "°") %>% 
+  separate(Longitude, into = c("longitude", "drop2"), 
+           sep = "°") %>% 
+  separate(longitude, into = c("drop3", "longitude"), 
+           sep = "–") %>% 
+  select(-drop1, -drop2, -drop3, -State, -county) %>% 
+  mutate(latitude = as.numeric(latitude),
+         longitude = as.numeric(longitude)*-1) %>%
+  filter(year == 2016,
+         `parent-location` == "Minnesota") %>% 
+  select (-c("low-flag", "imputed", "subbed")) %>% 
+  mutate(lwr_name = str_to_lower(name)) %>% 
+  ggplot(aes(fill = population)) +
+  geom_map(map = mn_map,
+           aes(map_id = lwr_name)) +
+        geom_point(aes(x = longitude, y = latitude, size = `eviction-rate`),
+                 color = "red") + 
   scale_fill_viridis_c(labels = comma) +
   expand_limits(x = mn_map$long, y = mn_map$lat) + 
   theme_map()
