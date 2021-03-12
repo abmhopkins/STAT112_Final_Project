@@ -75,6 +75,106 @@ evict_rate_map <- evictions_state %>%
   ggplotly(evict_rate_map)
 ```
 
+To help us look at the data and see how it is related, we made a correlation plot with race and the eviction related variables. Unfortunately, nothing jumped out at us. We found it interesting that the percent of white people in a state was negatively correlated with all of the eviction variables but the percent of African American people is positively correlated, though these relationships are both weak.
+
+```{r}
+corrplot <- evictions_state[, c(13:24)]
+
+corrplot <- corrplot %>% 
+  rename(
+    `% White` = `pct-white`,
+    `% African American` = `pct-af-am` ,
+    `% Hispanic` = `pct-hispanic`,
+    `% American Indian `= `pct-am-ind`,
+    `% Asian` = `pct-asian`,
+    `% Pacific Islander` = `pct-nh-pi`,
+    `% Multiple` = `pct-multiple`,
+    `% Other` = `pct-other`,
+    `Eviction Filings` = `eviction-filings`,
+    `Evictions` = `evictions`,
+    `Eviction Rate` = `eviction-rate`,
+    `Eviction Filing Rate` = `eviction-filing-rate`              
+  )
+
+corrplot <- round(cor(mydata, use = "pairwise.complete.obs"),2)
+
+library(reshape2)
+melted_cormat <- melt(corrplot)
+
+  # Get upper triangle of the correlation matrix
+  get_upper_tri <- function(cormat){
+    cormat[lower.tri(cormat)]<- NA
+    return(cormat)
+  }
+  upper_tri <- get_upper_tri(corrplot)
+
+melted_cormat <- melt(upper_tri, na.rm = TRUE)
+# Heatmap
+ggplot(data = melted_cormat, aes(Var2, Var1, fill = value))+
+ geom_tile(color = "white")+
+ scale_fill_gradient2(low = "blue", high = "red", mid = "white", 
+   midpoint = 0, limit = c(-1,1), space = "Lab", 
+   name="Pearson\nCorrelation") +
+  theme_minimal()+ 
+ theme(axis.text.x = element_text(angle = 45, vjust = 1, 
+    size = 10, hjust = 1),
+    plot.title.position = "plot")+
+  labs(title = "Eviction Correlation Plot with Race Related Variables",
+       y = "",
+       x = "") +
+ coord_fixed() 
+```
+
+Looking at a similar plot with rent and population data and the relationship with the eviction variables. Once again, nothing really jumps out at us that is not already to be expected. There is a strong positive relationship between evictions and population and renter occupied households, this is to be expected. We would expect this to be true, places with more people will have more evictions. The other variables relationship with Eviction Rate are all very weak and we do not feel confident about a causal relationship.
+
+```{r}
+corrplot2 <- evictions_state[, c(5:12, 21:24)]
+
+corrplot2 <- corrplot2 %>% 
+  rename(
+    `Population` = `population`,
+    `Poverty Rate` = `poverty-rate` ,
+    `Renter Occupied Households` = `renter-occupied-households`,
+    `% Renter Occupied`= `pct-renter-occupied`,
+    `Median Gross Rent` = `median-gross-rent`,
+    `Median Household Income` = `median-household-income`,
+    `Median Property Value` = `median-property-value`,
+    `Rent Burden` = `rent-burden`,
+    `Eviction Filings` = `eviction-filings`,
+    `Evictions` = `evictions`,
+    `Eviction Rate` = `eviction-rate`,
+    `Eviction Filing Rate` = `eviction-filing-rate`              
+  )
+
+corrplot2 <- round(cor(corrplot2, use = "pairwise.complete.obs"),2)
+
+library(reshape2)
+melted_cormat <- melt(corrplot2)
+
+# Get upper triangle of the correlation matrix
+  get_upper_tri <- function(cormat){
+    cormat[lower.tri(cormat)]<- NA
+    return(cormat)
+  }
+  upper_tri <- get_upper_tri(corrplot2)
+
+melted_cormat <- melt(upper_tri, na.rm = TRUE)
+# Heatmap
+ggplot(data = melted_cormat, aes(Var2, Var1, fill = value))+
+ geom_tile(color = "white")+
+ scale_fill_gradient2(low = "blue", high = "red", mid = "white", 
+   midpoint = 0, limit = c(-1,1), space = "Lab", 
+   name="Pearson\nCorrelation") +
+  theme_minimal()+ 
+ theme(axis.text.x = element_text(angle = 45, vjust = 1, 
+    size = 10, hjust = 1),
+    plot.title.position = "plot")+
+  labs(title = "Eviction Correlation Plot with Rent Related Variables",
+       y = "",
+       x = "") +
+ coord_fixed() 
+```
+
 This graph for example overlays evictions rates on a map of the US that is colored by population. We can see that population does not seem to have a strong effect on eviction rates as California and Texas do not have greatly high eviction rates compared to some states like South Carolina and Delaware which have much lower populations.
 
 ```{r}
@@ -90,7 +190,7 @@ evictions_state %>%
            aes(map_id = name,
                fill = population)) +
   geom_point(aes(x = lon, y = lat, size = `eviction-rate`),
-             color = "red") +
+             color = "tomato") +
   expand_limits(x = states_map$long, y = states_map$lat) + 
   theme_map() +
   labs(title = "",

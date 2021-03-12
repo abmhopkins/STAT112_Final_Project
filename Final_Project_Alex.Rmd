@@ -111,6 +111,22 @@ evictions_state %>%
 mydata <- evictions_state[, c(13:24)]
 head(mydata)
 
+mydata <- mydata %>% 
+  rename(
+    `% White` = `pct-white`,
+    `% African American` = `pct-af-am` ,
+    `% Hispanic` = `pct-hispanic`,
+    `% American Indian `= `pct-am-ind`,
+    `% Asian` = `pct-asian`,
+    `% Pacific Islander` = `pct-nh-pi`,
+    `% Multiple` = `pct-multiple`,
+    `% Other` = `pct-other`,
+    `Eviction Filings` = `eviction-filings`,
+    `Evictions` = `evictions`,
+    `Eviction Rate` = `eviction-rate`,
+    `Eviction Filing Rate` = `eviction-filing-rate`              
+  )
+
 cormat <- round(cor(mydata, use = "pairwise.complete.obs"),2)
 cormat
 
@@ -119,18 +135,12 @@ melted_cormat <- melt(cormat)
 head(melted_cormat)
 ```
 ```{r}
-# Get lower triangle of the correlation matrix
-  get_lower_tri<-function(cormat){
-    cormat[upper.tri(cormat)] <- NA
-    return(cormat)
-  }
   # Get upper triangle of the correlation matrix
   get_upper_tri <- function(cormat){
     cormat[lower.tri(cormat)]<- NA
     return(cormat)
   }
   upper_tri <- get_upper_tri(cormat)
-upper_tri
 
 melted_cormat <- melt(upper_tri, na.rm = TRUE)
 # Heatmap
@@ -142,6 +152,56 @@ ggplot(data = melted_cormat, aes(Var2, Var1, fill = value))+
   theme_minimal()+ 
  theme(axis.text.x = element_text(angle = 45, vjust = 1, 
     size = 12, hjust = 1))+
+  labs(title = "Correlation Plot",
+       y = "",
+       x = "") +
+ coord_fixed() 
+```
+
+```{r}
+corrplot2 <- evictions_state[, c(5:12, 21:24)]
+
+corrplot2 <- corrplot2 %>% 
+  rename(
+    `Population` = `population`,
+    `Poverty Rate` = `poverty-rate` ,
+    `Renter Occupied Households` = `renter-occupied-households`,
+    `% Renter Occupied`= `pct-renter-occupied`,
+    `Median Gross Rent` = `median-gross-rent`,
+    `Median Household Income` = `median-household-income`,
+    `Median Property Value` = `median-property-value`,
+    `Rent Burden` = `rent-burden`,
+    `Eviction Filings` = `eviction-filings`,
+    `Evictions` = `evictions`,
+    `Eviction Rate` = `eviction-rate`,
+    `Eviction Filing Rate` = `eviction-filing-rate`              
+  )
+
+corrplot2 <- round(cor(corrplot2, use = "pairwise.complete.obs"),2)
+
+library(reshape2)
+melted_cormat <- melt(corrplot2)
+
+# Get upper triangle of the correlation matrix
+  get_upper_tri <- function(cormat){
+    cormat[lower.tri(cormat)]<- NA
+    return(cormat)
+  }
+  upper_tri <- get_upper_tri(corrplot2)
+
+melted_cormat <- melt(upper_tri, na.rm = TRUE)
+# Heatmap
+ggplot(data = melted_cormat, aes(Var2, Var1, fill = value))+
+ geom_tile(color = "white")+
+ scale_fill_gradient2(low = "blue", high = "red", mid = "white", 
+   midpoint = 0, limit = c(-1,1), space = "Lab", 
+   name="Pearson\nCorrelation") +
+  theme_minimal()+ 
+ theme(axis.text.x = element_text(angle = 45, vjust = 1, 
+    size = 10, hjust = 1))+
+  labs(title = "",
+       y = "",
+       x = "") +
  coord_fixed() 
 ```
 
