@@ -272,27 +272,6 @@ evictions <- evictions_county %>%
 race | evictions
 ```
 
-```{r}
-evictions <- evictions_county %>% 
-  filter(`parent-location` == "Minnesota",
-         year == 2016) %>% 
-  mutate(lwr_name = str_to_lower(name)) %>% 
-  ggplot(aes(fill = `evictions`)) +
-  geom_map(map = mn_map,
-           aes(map_id = lwr_name)) +
-  scale_fill_viridis_c(labels = comma) +
-  expand_limits(x = mn_map$long, y = mn_map$lat) + 
-  theme_map() +
-  labs(title = "Number of Evictions",
-       fill = "",
-       caption = "Data from 2016") +
-  theme(legend.background = element_blank(),
-            legend.position = "right")
-
-race | evictions
-```
-
-
 ### Our Shiny App
 Click [Here]() to interact with the data yourself! Choose from a variety of factors like race, median rent, and year to display graphs to see relationships between demographics and evictions. The first tab displays statewide data and the second "by state" tab displays individual states and their county level data. Both tabs have a check box that allows the user to overlay eviction rate data over states and counties. This allows for comparison of the eviction rate and the demographics of those places.
 
