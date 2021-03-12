@@ -44,7 +44,30 @@ theme_set(theme_minimal())
 evictions_state <- read_csv("evictions_state.csv")
 states_midpoint <- read_csv("state-midpoints.csv")
 
+evictions_county <- read_csv("evictions_county.csv") %>% 
+  separate(col = name, sep = " County", into = c("name", "drop")) %>% 
+  select(-drop) %>% 
+  mutate(name = str_replace_all(name, "St. ", "St "),
+         name = str_replace_all(name, " Parish", "")) %>% 
+  left_join(county_centroids,
+            by = c("GEOID" = "FIPS")) %>% 
+  separate(Latitude, into = c("latitude", "drop1"), 
+           sep = "°") %>% 
+  separate(Longitude, into = c("longitude", "drop2"), 
+           sep = "°") %>% 
+  separate(longitude, into = c("drop3", "longitude"), 
+           sep = "–") %>% 
+  select(-drop1, -drop2, -drop3, -State, -county) %>% 
+  mutate(latitude = as.numeric(latitude),
+         longitude = as.numeric(longitude)*-1)
+
+evictions_county$name[evictions_county$name == "LaMoure"] <- "La Moure"
+evictions_county$name[evictions_county$name == "DuPage"] <- "Du Page"
+evictions_county$name[evictions_county$name == "O'Brien"] <- "OBrien"
+evictions_county$name[evictions_county$name == "Ste. Genevieve"] <- "Ste Genevieve"
+
 states_map <- map_data("state")
+county_map <- map_data("county")
 ```
 
 ### The Data
