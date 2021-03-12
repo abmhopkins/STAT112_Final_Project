@@ -195,7 +195,7 @@ server <- function(input, output) {
       labs(title = "",
            fill = "",
            size = "",
-           caption = "Some county dots are not aligned")
+           caption = "Some county dots may not be aligned")
 
   })
 }
