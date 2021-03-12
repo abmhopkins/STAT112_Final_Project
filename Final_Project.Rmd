@@ -48,7 +48,7 @@ states_map <- map_data("state")
 ```
 
 ### The Data
-Our data is from the [Eviction Lab](https://evictionlab.org/), on their website they introduce themselves as "The Eviction Lab is a team of researchers, students, and website architects who believe that a stable, affordable home is central to human flourishing and economic mobility. Accordingly, understanding the sudden, traumatic loss of home through eviction is foundational to understanding poverty in America. Drawing on tens of millions of records, the Eviction Lab at Princeton University has published the first ever dataset of evictions in America, going back to 2000."
+Our data is from the [Eviction Lab](https://evictionlab.org/), on their website they introduce themselves as "The Eviction Lab is a team of researchers, students, and website architects who believe that a stable, affordable home is central to human flourishing and economic mobility. Accordingly, understanding the sudden, traumatic loss of home through eviction is foundational to understanding poverty in America. Drawing on tens of millions of records, the Eviction Lab at Princeton University has published the first ever dataset of evictions in America, going back to 2000." One of the main variables of interest is "Eviction Rate" which is a measure of the number of evictions per 100 renter homes.
 
 ### Our Initial Research Questions
 When we began thinking about the data we had some questions right away about eviction and race. Is there a relationship between race and the eviction rate in the US? There is also rent information in the data and we wanted to compare rent over each state and see what effect rent had on eviction rates. Some of the final questions we had were what are the states with the highest eviction filing rates and if it was easier to evict people in some states compared to others.
@@ -109,7 +109,6 @@ melted_cormat <- melt(corrplot)
   upper_tri <- get_upper_tri(corrplot)
 
 melted_cormat <- melt(upper_tri, na.rm = TRUE)
-# Heatmap
 ggplot(data = melted_cormat, aes(Var2, Var1, fill = value))+
  geom_tile(color = "white")+
  scale_fill_gradient2(low = "blue", high = "red", mid = "white", 
@@ -156,12 +155,11 @@ melted_cormat <- melt(corrplot2)
     cormat[lower.tri(cormat)]<- NA
     return(cormat)
   }
-  upper_tri <- get_upper_tri(corrplot2)
+upper_tri <- get_upper_tri(corrplot2)
 
 melted_cormat <- melt(upper_tri, na.rm = TRUE)
-# Heatmap
-ggplot(data = melted_cormat, aes(Var2, Var1, fill = value))+
- geom_tile(color = "white")+
+ggplot(data = melted_cormat, aes(Var2, Var1, fill = value)) +
+ geom_tile(color = "white") +
  scale_fill_gradient2(low = "blue", high = "red", mid = "white", 
    midpoint = 0, limit = c(-1,1), space = "Lab", 
    name="Pearson\nCorrelation") +
@@ -200,6 +198,86 @@ evictions_state %>%
   theme(legend.background = element_blank(),
         legend.position = "right") +
   labs(title = "Population and Eviction rates in 2016")
+```
+
+### Race and Evictions in Minnesota
+
+Looking at the counties with the highest percentage of African Americans in Minnesota compared to the counties with the highest eviction rates show that there is not that much overlap in Minnesota. Hennepin County (the county with the highest percentage of African Americans) has a very average rate of eviction compared to the other counties in Minnesota. Hennepin County does have the highest number of evictions in the state and while the rate may be low, there is a gap in the data. We do not know if African American renters are evicted at higher rates because we do not have eviction data by race. So while the rate in the county with the highest number of evictions is low, it could be disproportionately African Americans who are evicted.
+
+```{r}
+mn_map <- county_map %>% filter(region == "minnesota") %>% select(-region) %>% dplyr::rename(region = subregion)
+
+race <- evictions_county %>% 
+  filter(`parent-location` == "Minnesota",
+         year == 2016) %>% 
+  mutate(lwr_name = str_to_lower(name)) %>% 
+  ggplot(aes(fill = `pct-af-am`)) +
+  geom_map(map = mn_map,
+           aes(map_id = lwr_name)) +
+  scale_fill_viridis_c(labels = comma) +
+  expand_limits(x = mn_map$long, y = mn_map$lat) + 
+  theme_map() +
+  labs(title = "% African American",
+       fill = "",
+       caption = "Data from 2016") +
+  theme(legend.background = element_blank(),
+            legend.position = "right")
+
+eviction_rate <- evictions_county %>% 
+  filter(`parent-location` == "Minnesota",
+         year == 2016) %>% 
+  mutate(lwr_name = str_to_lower(name)) %>% 
+  ggplot(aes(fill = `eviction-rate`)) +
+  geom_map(map = mn_map,
+           aes(map_id = lwr_name)) +
+  scale_fill_viridis_c(labels = comma) +
+  expand_limits(x = mn_map$long, y = mn_map$lat) + 
+  theme_map() +
+  labs(title = "Eviction Rate",
+       fill = "",
+       caption = "Data from 2016") +
+  theme(legend.background = element_blank(),
+            legend.position = "right")
+
+race | eviction_rate
+
+evictions <- evictions_county %>% 
+  filter(`parent-location` == "Minnesota",
+         year == 2016) %>% 
+  mutate(lwr_name = str_to_lower(name)) %>% 
+  ggplot(aes(fill = `evictions`)) +
+  geom_map(map = mn_map,
+           aes(map_id = lwr_name)) +
+  scale_fill_viridis_c(labels = comma) +
+  expand_limits(x = mn_map$long, y = mn_map$lat) + 
+  theme_map() +
+  labs(title = "Number of Evictions",
+       fill = "",
+       caption = "Data from 2016") +
+  theme(legend.background = element_blank(),
+            legend.position = "right")
+
+race | evictions
+```
+
+```{r}
+evictions <- evictions_county %>% 
+  filter(`parent-location` == "Minnesota",
+         year == 2016) %>% 
+  mutate(lwr_name = str_to_lower(name)) %>% 
+  ggplot(aes(fill = `evictions`)) +
+  geom_map(map = mn_map,
+           aes(map_id = lwr_name)) +
+  scale_fill_viridis_c(labels = comma) +
+  expand_limits(x = mn_map$long, y = mn_map$lat) + 
+  theme_map() +
+  labs(title = "Number of Evictions",
+       fill = "",
+       caption = "Data from 2016") +
+  theme(legend.background = element_blank(),
+            legend.position = "right")
+
+race | evictions
 ```
 
 
