@@ -96,7 +96,7 @@ corrplot <- corrplot %>%
     `Eviction Filing Rate` = `eviction-filing-rate`              
   )
 
-corrplot <- round(cor(mydata, use = "pairwise.complete.obs"),2)
+corrplot <- round(cor(corrplot, use = "pairwise.complete.obs"),2)
 
 library(reshape2)
 melted_cormat <- melt(corrplot)
