@@ -25,6 +25,8 @@ evictions_county <- read_csv("evictions_county.csv") %>%
   select(-drop) %>% 
   mutate(name = str_replace_all(name, "St. ", "St "),
          name = str_replace_all(name, " Parish", "")) %>% 
+  filter(`parent-location` != "Alaska",      
+         `parent-location` != "Hawaii") %>% 
   left_join(county_centroids,
             by = c("GEOID" = "FIPS")) %>% 
   separate(Latitude, into = c("latitude", "drop1"), 
@@ -47,13 +49,13 @@ evictions_county$name[evictions_county$name == "Ste. Genevieve"] <- "Ste Genevie
 # The Centroid of Each State
 states_midpoint <- read_csv("state-midpoints.csv")
 
-
-
+# Map Data
 states_map <- map_data("state")
 county_map <- map_data("county")
 
 ui <- fluidPage(
     navbarPage("Eviction rates of US", theme = shinytheme("lumen"),
+            # Country Tab User Interface
              tabPanel("Country wide by year", fluid = TRUE,
                       sidebarLayout(
                         sidebarPanel(
@@ -90,15 +92,16 @@ ui <- fluidPage(
                         )
                       )
                     ),
+             # State Tab User Interface
              tabPanel("By state", fluid = TRUE,
                       sidebarLayout(
                         sidebarPanel(
                           selectInput(inputId = "stateName",
                                       label = "State:",
-                                      choices = unique(evictions_state$name),
+                                      choices = unique(evictions_county$`parent-location`),
                                       selected = "Alabama", #this is not selected
                                       multiple = FALSE),
-                          sliderInput(inputId = "year",
+                          sliderInput(inputId = "yearCounty",
                                       label = "Year:",
                                       min = 2000,
                                       max = 2016,
@@ -137,6 +140,8 @@ ui <- fluidPage(
 
 server <- function(input, output) {
   output$nameplot <- renderPlotly({
+    
+    # Plot for Country Wide-Data
     country_plot <- evictions_state %>% 
       left_join(states_midpoint,
                 by = c("name" = "location")) %>% 
@@ -151,7 +156,7 @@ server <- function(input, output) {
                    text = paste0(name, paste0(":<br>", format(get(input$colName) , big.mark=","))))) +
       {if(input$dots)geom_point(aes(x = lon, y = lat, size = get(input$dotCol),
                                     text = paste0(input$dotCol, paste0(": ", get(input$dotCol)))),
-                 color = "red")} + 
+                 color = "tomato")} + 
       expand_limits(x = states_map$long, y = states_map$lat) + 
       theme_map() +
       labs(title = "",
@@ -166,12 +171,14 @@ server <- function(input, output) {
   
   output$countyplot <- renderPlot({
     
+    # Cleaning the county map data
     map <- county_map %>% filter(region == str_to_lower(input$stateName)) %>% 
       select(-region) %>% 
       dplyr::rename(region = subregion)
     
+    # Map for county-wide data
     evictions_county %>% 
-      filter(year == input$year,
+      filter(year == input$yearCounty,
              `parent-location` == input$stateName) %>% 
       select (-c("low-flag", "imputed", "subbed")) %>% 
       mutate(lwr_name = str_to_lower(name)) %>% 
@@ -179,7 +186,7 @@ server <- function(input, output) {
       geom_map(map = map,
                aes(map_id = lwr_name))  +
       {if(input$county_dots)geom_point(aes_string(x = "longitude", y = "latitude", size = input$countyDotCol),
-                                color = "red")} +
+                                color = "tomato")} +
       scale_fill_viridis_c(labels = comma) +
       expand_limits(x = map$long, y = map$lat) + 
       theme_map() +
@@ -187,7 +194,8 @@ server <- function(input, output) {
             legend.position = "right")  +
       labs(title = "",
            fill = "",
-           size = "")
+           size = "",
+           caption = "Some county dots are not aligned")
 
   })
 }
