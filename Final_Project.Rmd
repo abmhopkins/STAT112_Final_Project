@@ -48,18 +48,7 @@ evictions_county <- read_csv("evictions_county.csv") %>%
   separate(col = name, sep = " County", into = c("name", "drop")) %>% 
   select(-drop) %>% 
   mutate(name = str_replace_all(name, "St. ", "St "),
-         name = str_replace_all(name, " Parish", "")) %>% 
-  left_join(county_centroids,
-            by = c("GEOID" = "FIPS")) %>% 
-  separate(Latitude, into = c("latitude", "drop1"), 
-           sep = "°") %>% 
-  separate(Longitude, into = c("longitude", "drop2"), 
-           sep = "°") %>% 
-  separate(longitude, into = c("drop3", "longitude"), 
-           sep = "–") %>% 
-  select(-drop1, -drop2, -drop3, -State, -county) %>% 
-  mutate(latitude = as.numeric(latitude),
-         longitude = as.numeric(longitude)*-1)
+         name = str_replace_all(name, " Parish", ""))
 
 evictions_county$name[evictions_county$name == "LaMoure"] <- "La Moure"
 evictions_county$name[evictions_county$name == "DuPage"] <- "Du Page"
