@@ -6,6 +6,8 @@ library(shiny)         # for creating interactive apps
 library(shinythemes)
 library(scales)
 library(rvest)
+library(ggmap)
+library(maps)
 theme_set(theme_minimal())
 
 # Eviction Data by State
