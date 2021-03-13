@@ -274,7 +274,7 @@ race | evictions
 ```
 
 ### Our Shiny App
-Click [Here]() to interact with the data yourself! Choose from various factors like race, median rent, and year to display graphs to see relationships between demographics and evictions. The first tab displays statewide data, and the second "by state" tab displays individual states and their county-level data. Both tabs have a check box that allows the user to overlay eviction rate data over states and counties. This allows for a comparison between the eviction rate and the demographics of those places.
+Click [Here](https://alexhopkins.shinyapps.io/US-Evictions/) to interact with the data yourself! Choose from various factors like race, median rent, and year to display graphs to see relationships between demographics and evictions. The first tab displays statewide data, and the second "by state" tab displays individual states and their county-level data. Both tabs have a check box that allows the user to overlay eviction rate data over states and counties. This allows for a comparison between the eviction rate and the demographics of those places.
 
 ### Final Remarks
 We observe that areas with larger populations have higher eviction rates, which is pretty straightforward. More people means more renters, which means more chances for evictions. States like Nevada and Arizona had large eviction rates at first, but over time they have diminished, while states like South Carolina have seen considerable rises in their eviction rates. In 2008-09 the eviction crisis was high, mirroring the economic crisis. We hope that creating this app will make it easier to make insights about eviction data in the U.S. and produce easy-to-understand visualizations of the eviction data.

@@ -8,6 +8,7 @@ library(scales)
 library(rvest)
 library(ggmap)
 library(maps)
+library(mapproj)
 theme_set(theme_minimal())
 
 # Eviction Data by State
@@ -166,8 +167,9 @@ server <- function(input, output) {
            size = input$dotCol) +
       scale_fill_viridis_c(labels = comma) +
       theme(legend.background = element_blank(),
-            legend.position = "right")
-  
+            legend.position = "right") +
+      coord_map()
+
   ggplotly(country_plot, tooltip = "text")
   })
   
@@ -193,11 +195,13 @@ server <- function(input, output) {
       expand_limits(x = map$long, y = map$lat) + 
       theme_map() +
       theme(legend.background = element_blank(),
-            legend.position = "right")  +
+            legend.position = "right",
+            legend.text = element_text(size = 11))  +
       labs(title = "",
            fill = "",
            size = "",
-           caption = "Some county dots may not be aligned")
+           caption = "Some county dots may not be aligned") +
+      coord_map()
 
   })
 }
