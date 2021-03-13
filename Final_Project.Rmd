@@ -76,7 +76,7 @@ evict_rate_map <- evictions_state %>%
   geom_map(map = states_map,
            aes(map_id = name,
                fill = `eviction-rate`,
-               text = paste0(name, paste0(":<br>", format(get(input$colName) , big.mark=","))))) +
+               text = paste0(name, paste0(":<br>", `eviction-rate`)))) +
   expand_limits(x = states_map$long, y = states_map$lat) + 
   theme_map() +
   labs(title = "",
