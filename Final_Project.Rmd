@@ -60,13 +60,13 @@ county_map <- map_data("county")
 ```
 
 ### The Data
-Our data is from the [Eviction Lab](https://evictionlab.org/), on their website they introduce themselves as "The Eviction Lab is a team of researchers, students, and website architects who believe that a stable, affordable home is central to human flourishing and economic mobility. Accordingly, understanding the sudden, traumatic loss of home through eviction is foundational to understanding poverty in America. Drawing on tens of millions of records, the Eviction Lab at Princeton University has published the first ever dataset of evictions in America, going back to 2000." One of the main variables of interest is "Eviction Rate" which is a measure of the number of evictions per 100 renter homes.
+Our data is from the [Eviction Lab](https://evictionlab.org/). On their website, they introduce themselves as "The Eviction Lab is a team of researchers, students, and website architects who believe that a stable, affordable home is central to human flourishing and economic mobility. Accordingly, understanding the sudden, traumatic loss of home through eviction is foundational to understanding poverty in America. Drawing on tens of millions of records, the Eviction Lab at Princeton University has published the first-ever dataset of evictions in America, going back to 2000." One of the main variables of interest is "Eviction Rate," which is a measure of the number of evictions per 100 renter homes.
 
 ### Our Initial Research Questions
-When we began thinking about the data we had some questions right away about eviction and race. Is there a relationship between race and the eviction rate in the US? There is also rent information in the data and we wanted to compare rent over each state and see what effect rent had on eviction rates. Some of the final questions we had were what are the states with the highest eviction filing rates and if it was easier to evict people in some states compared to others.
+When we began thinking about the data, we had some questions right away about eviction and race. Is there a relationship between race and the eviction rate in the US? There is also rent information in the data, and we wanted to compare rent over each state and see what effect rent had on eviction rates. Some of the final questions we had were what are the states with the highest eviction filing rates, and if there are states where it is easier to evict people. 
 
 ### Some Preliminary Graphs
-First we wanted to explore the data with a plotly graph and mapped the eviction rates by state in 2016. After looking at that graph and discussing more what we wanted to show with our data (Courtesy of Eviction Lab) we decided to make a shiny app that users could interact with to see eviction rates over time as well as interact with demographic and other data by state to see relationships between that data and eviction rates. 
+First, we wanted to explore the data with a plotly graph and mapped the 2016 eviction rates by state. After looking at that graph and discussing what we wanted to show with our data (Courtesy of Eviction Lab), we decided to make a shiny app.  We wanted an app that users could interact with to see eviction rates over time as well as interact with demographics and other data by state to see relationships between that data and eviction rates.  
 
 ```{r}
 evict_rate_map <- evictions_state %>% 
@@ -88,7 +88,7 @@ evict_rate_map <- evictions_state %>%
   ggplotly(evict_rate_map, tooltip = "text")
 ```
 
-To help us look at the data and see how it is related, we made a correlation plot with race and the eviction related variables. Unfortunately, nothing jumped out at us. We found it interesting that the percent of white people in a state was negatively correlated with all of the eviction variables but the percent of African American people is positively correlated, though these relationships are both weak.
+To help us look at the data and see how it is related, we made a correlation plot with race and the eviction-related variables. Unfortunately, nothing jumped out at us. We found it interesting that the percent of white people in a state was negatively correlated with all of the eviction variables, but the percent of African American people is positively correlated, though these relationships are both weak.
 
 ```{r}
 corrplot <- evictions_state[, c(13:24)]
@@ -137,7 +137,7 @@ ggplot(data = melted_cormat, aes(Var2, Var1, fill = value))+
  coord_fixed() 
 ```
 
-Looking at a similar plot with rent and population data and the relationship with the eviction variables. Once again, nothing really jumps out at us that is not already to be expected. There is a strong positive relationship between evictions and population and renter occupied households, this is to be expected. We would expect this to be true, places with more people will have more evictions. The other variables relationship with Eviction Rate are all very weak and we do not feel confident about a causal relationship.
+When looking at a similar plot with rent, population data, and the relationship with the eviction variables, once again, nothing jumps out at us that is not already to be expected. There is a strong positive relationship between evictions, population, and renter-occupied households. We would expect this to be true since places with more people will have more evictions. Other variable relationships with Eviction Rate are all very weak, and we do not feel confident about a causal relationship.
 
 ```{r}
 corrplot2 <- evictions_state[, c(5:12, 21:24)]
@@ -186,7 +186,7 @@ ggplot(data = melted_cormat, aes(Var2, Var1, fill = value)) +
  coord_fixed() 
 ```
 
-This graph for example overlays evictions rates on a map of the US that is colored by population. We can see that population does not seem to have a strong effect on eviction rates as California and Texas do not have greatly high eviction rates compared to some states like South Carolina and Delaware which have much lower populations.
+This graph, for example, overlays eviction rates on a map of the US that is colored by population. We can see that population does not substantially affect eviction rates as California and Texas do not have significantly high eviction rates compared to states like South Carolina and Delaware, which have much lower populations.
 
 ```{r}
 options(scipen = 9)
@@ -215,7 +215,7 @@ evictions_state %>%
 
 ### Race and Evictions in Minnesota
 
-Looking at the counties with the highest percentage of African Americans in Minnesota compared to the counties with the highest eviction rates show that there is not that much overlap in Minnesota. Hennepin County (the county with the highest percentage of African Americans) has a very average rate of eviction compared to the other counties in Minnesota. Hennepin County does have the highest number of evictions in the state and while the rate may be low, there is a gap in the data. We do not know if African American renters are evicted at higher rates because we do not have eviction data by race. So while the rate in the county with the highest number of evictions is low, it could be disproportionately African Americans who are evicted.
+Looking at the counties with the highest percentage of African Americans in Minnesota compared to the counties with the highest eviction rates shows that there is not much overlap in Minnesota. Hennepin County (the county with the highest percentage of African Americans) has a very average eviction rate compared to the other counties in Minnesota. Hennepin County does have the highest number of evictions in the state, and while the rate may be low, there is a gap in the data. We do not know if African American renters are evicted at higher rates because we do not have eviction data by race. So while the rate in the county with the highest number of evictions is low, it could be disproportionately African Americans who are evicted.
 
 ```{r}
 mn_map <- county_map %>% filter(region == "minnesota") %>% select(-region) %>% dplyr::rename(region = subregion)
@@ -274,8 +274,8 @@ race | evictions
 ```
 
 ### Our Shiny App
-Click [Here]() to interact with the data yourself! Choose from a variety of factors like race, median rent, and year to display graphs to see relationships between demographics and evictions. The first tab displays statewide data and the second "by state" tab displays individual states and their county level data. Both tabs have a check box that allows the user to overlay eviction rate data over states and counties. This allows for comparison of the eviction rate and the demographics of those places.
+Click [Here]() to interact with the data yourself! Choose from various factors like race, median rent, and year to display graphs to see relationships between demographics and evictions. The first tab displays statewide data, and the second "by state" tab displays individual states and their county-level data. Both tabs have a check box that allows the user to overlay eviction rate data over states and counties. This allows for a comparison between the eviction rate and the demographics of those places.
 
 ### Final Remarks
-We observe that areas with larger populations have larger eviction rates, which is pretty straightforward. More people means more renters which means more chances for evictions. States like Nevada and Arizona had large eviction rates at first, but over time they have diminished, while states like South Carolina have seen huge rises in the eviction rate. In 2008-09 the eviction crisis was high mirroring the economic crisis. We hope by creating this app to make it easier to make insights about eviction data in the U.S. and produce easy to understand visualizations of the eviction data.
+We observe that areas with larger populations have higher eviction rates, which is pretty straightforward. More people means more renters, which means more chances for evictions. States like Nevada and Arizona had large eviction rates at first, but over time they have diminished, while states like South Carolina have seen considerable rises in their eviction rates. In 2008-09 the eviction crisis was high, mirroring the economic crisis. We hope that creating this app will make it easier to make insights about eviction data in the U.S. and produce easy-to-understand visualizations of the eviction data.
 
