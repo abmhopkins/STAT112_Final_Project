@@ -75,7 +75,8 @@ evict_rate_map <- evictions_state %>%
   ggplot() +
   geom_map(map = states_map,
            aes(map_id = name,
-               fill = `eviction-rate`)) +
+               fill = `eviction-rate`,
+               text = paste0(name, paste0(":<br>", format(get(input$colName) , big.mark=","))))) +
   expand_limits(x = states_map$long, y = states_map$lat) + 
   theme_map() +
   labs(title = "",
@@ -84,7 +85,7 @@ evict_rate_map <- evictions_state %>%
   theme(legend.background = element_blank()) +
   labs(title = "Eviction Rate by State in 2016")
 
-  ggplotly(evict_rate_map)
+  ggplotly(evict_rate_map, tooltip = "text")
 ```
 
 To help us look at the data and see how it is related, we made a correlation plot with race and the eviction related variables. Unfortunately, nothing jumped out at us. We found it interesting that the percent of white people in a state was negatively correlated with all of the eviction variables but the percent of African American people is positively correlated, though these relationships are both weak.
