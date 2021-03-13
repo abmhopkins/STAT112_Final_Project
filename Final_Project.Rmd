@@ -3,6 +3,7 @@ title: "Final Project"
 author: "Alexander Hopkins, Brett Hunsanger & Ted Dove"
 output: 
   html_document:
+    theme: lumen
     keep_md: TRUE
     toc: TRUE
     toc_float: TRUE
@@ -71,10 +72,10 @@ First, we wanted to explore the data with a plotly graph and mapped the 2016 evi
 ```{r}
 evict_rate_map <- evictions_state %>% 
   filter(year == 2016) %>% 
-  mutate(name = str_to_lower(name)) %>% 
+  mutate(lwr_name = str_to_lower(name)) %>% 
   ggplot() +
   geom_map(map = states_map,
-           aes(map_id = name,
+           aes(map_id = lwr_name,
                fill = `eviction-rate`,
                text = paste0(name, paste0(":<br>", `eviction-rate`)))) +
   expand_limits(x = states_map$long, y = states_map$lat) + 
@@ -210,7 +211,35 @@ evictions_state %>%
   scale_fill_viridis_c(labels = comma) +
   theme(legend.background = element_blank(),
         legend.position = "right") +
-  labs(title = "Population and Eviction rates in 2016")
+  labs(title = "Population and Eviction Rates in 2016") +
+  coord_map()
+```
+
+In this plot of median gross rent and eviction rates we can see that there is not a clear relationship between high rental prices and eviction rates. California and New York have some of the highest rents in the country but have pretty average eviction rates. The Carolina's have close to average median rents but very high eviction rates. This leads us to believe that high rental prices might not cause more evictions.
+```{r}
+options(scipen = 9)
+evictions_state %>% 
+  left_join(states_midpoint,
+            by = c("name" = "location")) %>% 
+  filter(year == 2016,
+         name != "Hawaii") %>% 
+  mutate(name = str_to_lower(name)) %>% 
+  ggplot() +
+  geom_map(map = states_map,
+           aes(map_id = name,
+               fill = `median-gross-rent`)) +
+  geom_point(aes(x = lon, y = lat, size = `eviction-rate`),
+             color = "tomato") +
+  expand_limits(x = states_map$long, y = states_map$lat) + 
+  theme_map() +
+  labs(title = "",
+       fill = "Median Gross Rent",
+       size = "Eviction Rate") +
+  scale_fill_viridis_c(labels = comma) +
+  theme(legend.background = element_blank(),
+        legend.position = "right") +
+  labs(title = "Median Rent and Eviction Rates in 2016") +
+  coord_map()
 ```
 
 ### Race and Evictions in Minnesota
@@ -234,7 +263,8 @@ race <- evictions_county %>%
        fill = "",
        caption = "Data from 2016") +
   theme(legend.background = element_blank(),
-            legend.position = "right")
+            legend.position = "right") +
+  coord_map()
 
 eviction_rate <- evictions_county %>% 
   filter(`parent-location` == "Minnesota",
@@ -250,7 +280,8 @@ eviction_rate <- evictions_county %>%
        fill = "",
        caption = "Data from 2016") +
   theme(legend.background = element_blank(),
-            legend.position = "right")
+            legend.position = "right") +
+  coord_map()
 
 race | eviction_rate
 
@@ -268,7 +299,8 @@ evictions <- evictions_county %>%
        fill = "",
        caption = "Data from 2016") +
   theme(legend.background = element_blank(),
-            legend.position = "right")
+            legend.position = "right") +
+  coord_map()
 
 race | evictions
 ```
