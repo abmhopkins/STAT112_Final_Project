@@ -88,7 +88,7 @@ ui <- fluidPage(
                               submitButton(text = "Create my plot!")
                         ),
                         mainPanel(
-                          plotlyOutput(outputId = "nameplot")
+                          plotlyOutput(outputId = "nameplot", height = 'auto')
                         )
                       )
                     ),
