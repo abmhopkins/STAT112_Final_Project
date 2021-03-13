@@ -12,7 +12,9 @@ library(mapproj)
 theme_set(theme_minimal())
 
 # Eviction Data by State
-evictions_state <- read_csv("evictions_state.csv")
+evictions_state <- read_csv("evictions_state.csv") %>% 
+  rename(`Eviction Rate` = `eviction-rate`,
+         `Eviction Filing Rate` = `eviction-filing-rate`)
 
 # Scrape the County Centroids
 url <- "https://en.wikipedia.org/wiki/User:Michael_J/County_table"
@@ -85,8 +87,8 @@ ui <- fluidPage(
                                             value = TRUE),
                               selectInput(inputId = "dotCol",
                                           label = "Dots:",
-                                          choices = list("Eviction Rate" = "eviction-rate",
-                                                         "Eviction Filing Rate" = "eviction-filing-rate"),
+                                          choices = list("Eviction Rate",
+                                                         "Eviction Filing Rate"),
                                           multiple = FALSE),
                               submitButton(text = "Create my plot!")
                         ),
