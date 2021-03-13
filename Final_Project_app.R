@@ -59,7 +59,7 @@ states_map <- map_data("state")
 county_map <- map_data("county")
 
 ui <- fluidPage(
-    navbarPage("Eviction rates of US", theme = shinytheme("lumen"),
+    navbarPage("Evictions in the United States", theme = shinytheme("lumen"),
             # Country Tab User Interface
              tabPanel("Country wide by year", fluid = TRUE,
                       sidebarLayout(
