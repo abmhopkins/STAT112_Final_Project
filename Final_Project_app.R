@@ -8,10 +8,13 @@ library(scales)
 library(rvest)
 library(ggmap)
 library(maps)
+library(mapproj)
 theme_set(theme_minimal())
 
 # Eviction Data by State
-evictions_state <- read_csv("evictions_state.csv")
+evictions_state <- read_csv("evictions_state.csv") %>% 
+  rename(`Eviction Rate` = `eviction-rate`,
+         `Eviction Filing Rate` = `eviction-filing-rate`)
 
 # Scrape the County Centroids
 url <- "https://en.wikipedia.org/wiki/User:Michael_J/County_table"
@@ -56,7 +59,7 @@ states_map <- map_data("state")
 county_map <- map_data("county")
 
 ui <- fluidPage(
-    navbarPage("Eviction rates of US", theme = shinytheme("lumen"),
+    navbarPage("Evictions in the United States", theme = shinytheme("lumen"),
             # Country Tab User Interface
              tabPanel("Country wide by year", fluid = TRUE,
                       sidebarLayout(
@@ -84,8 +87,8 @@ ui <- fluidPage(
                                             value = TRUE),
                               selectInput(inputId = "dotCol",
                                           label = "Dots:",
-                                          choices = list("Eviction Rate" = "eviction-rate",
-                                                         "Eviction Filing Rate" = "eviction-filing-rate"),
+                                          choices = list("Eviction Rate",
+                                                         "Eviction Filing Rate"),
                                           multiple = FALSE),
                               submitButton(text = "Create my plot!")
                         ),
@@ -166,8 +169,9 @@ server <- function(input, output) {
            size = input$dotCol) +
       scale_fill_viridis_c(labels = comma) +
       theme(legend.background = element_blank(),
-            legend.position = "right")
-  
+            legend.position = "right") +
+      coord_map()
+
   ggplotly(country_plot, tooltip = "text")
   })
   
@@ -193,11 +197,13 @@ server <- function(input, output) {
       expand_limits(x = map$long, y = map$lat) + 
       theme_map() +
       theme(legend.background = element_blank(),
-            legend.position = "right")  +
+            legend.position = "right",
+            legend.text = element_text(size = 11))  +
       labs(title = "",
            fill = "",
            size = "",
-           caption = "Some county dots may not be aligned")
+           caption = "Some county dots may not be aligned") +
+      coord_map()
 
   })
 }

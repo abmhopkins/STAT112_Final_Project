@@ -29,6 +29,7 @@ library(rvest)         # for scraping data
 library(robotstxt)     # for checking if you can scrape data
 library(readxl)
 library(scales)
+library(mapproj)
 theme_set(theme_minimal())
 ```
 
@@ -40,7 +41,16 @@ states_midpoint <- read_csv("state-midpoints.csv")
 states_map <- map_data("state")
 county_map <- map_data("county")
 
-evictions_county_org <- read_csv("evictions_county.csv")
+url <- "https://en.wikipedia.org/wiki/User:Michael_J/County_table"
+webpage <- read_html(url)
+
+table <- html_nodes(webpage, "table")[[1]] %>% 
+  html_table()
+
+county_centroids <- table %>% 
+  select(State:`County [2]`, Latitude:Longitude)
+
+names(county_centroids)[names(county_centroids) == "County [2]"] <- "county"
 
 evictions_county <- read_csv("evictions_county.csv") %>% 
   separate(col = name, sep = " County", into = c("name", "drop")) %>% 
@@ -78,7 +88,8 @@ evict_rate_map <- evictions_state %>%
   labs(title = "",
        fill = "") +
   scale_fill_viridis_c() +
-  theme(legend.background = element_blank())
+  theme(legend.background = element_blank()) +
+  coord_map()
 
   ggplotly(evict_rate_map)
 ```
@@ -104,7 +115,8 @@ evictions_state %>%
        size = "Eviction Rate") +
   scale_fill_viridis_c(labels = comma) +
   theme(legend.background = element_blank(),
-        legend.position = "right")
+        legend.position = "right") +
+  coord_map()
 ```
 
 ```{r}
