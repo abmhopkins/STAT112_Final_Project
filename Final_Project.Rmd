@@ -1,5 +1,5 @@
 ---
-title: "Demographics of Eviction in the US from 2000-2016?"
+title: "Demographics of Eviction in the US from 2000-2016"
 author: "Alexander Hopkins, Brett Hunsanger & Ted Dove"
 output: 
   html_document:
@@ -37,6 +37,7 @@ library(rvest)         # for scraping data
 library(robotstxt)     # for checking if you can scrape data
 library(readxl)
 library(scales)
+library(mapproj)
 theme_set(theme_minimal())
 ```
 
